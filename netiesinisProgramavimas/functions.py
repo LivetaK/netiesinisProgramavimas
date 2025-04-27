@@ -20,7 +20,8 @@ def hi(taskas):
     
 def bauda(taskas, r):
     g = gi(taskas)
-    b = sum((max(0, -x))**2 for x in taskas)
+    h = hi(taskas)
+    b = sum((max(0, x))**2 for x in h)
     b += g**2
     return tikslo_funkcija(taskas) + 1.0 / r * b
 
@@ -63,9 +64,9 @@ def baudsosGradientas(taskas, r):
 
 def test():
     print("Iveskite pradinio tasko koordinates\n")
-    x1 = float(input("x1 = "))
-    x2 = float(input("x2 = "))
-    x3 = float(input("x3 = "))
+    x1 = float(input("a = "))
+    x2 = float(input("b = "))
+    x3 = float(input("c = "))
     r = float(input("Iveskite r reiksme\n"))
     taskas = [x1, x2, x3]
     print("Tikslo funkcijos reiksme = ", tikslo_funkcija(taskas))
@@ -75,7 +76,8 @@ def test():
 
 
 
-def auksoPjuvis(taskas, r):
+def auksoPjuvis(taskas, r, t):
+    t = 0
     auksoPjuv = (math.sqrt(5) - 1) / 2
     a = 0.0
     b = 10.0
@@ -98,6 +100,7 @@ def auksoPjuvis(taskas, r):
 
     fx1 = bauda(taskasX1, r)
     fx2 = bauda(taskasX2, r)
+    t += 2
     
     while abs(b - a) > epsilon:
         if fx1 < fx2:
@@ -112,6 +115,7 @@ def auksoPjuvis(taskas, r):
                 taskas[2] - x1 * grad[2]
             ]
             fx1 = bauda(taskasX1, r)
+            t +=1
         else:
             a = x1
             x1 = x2
@@ -124,8 +128,9 @@ def auksoPjuvis(taskas, r):
                 taskas[2] - x2 * grad[2]
             ]
             fx2 = bauda(taskasX2, r)
+            t += 1
     
-    return (a + b) / 2
+    return (a + b) / 2, t
 
 def norma(v):
     return np.linalg.norm(v)
@@ -134,14 +139,18 @@ def norma(v):
 def tenkina_apribojimus(taskas):
     return gi(taskas) <= 0 and all(x >= 0 for x in taskas)
 
-def greiciausiasNusileidimas(taskas, r):
-
+def greiciausiasNusileidimas(taskas, r, i, t):
+    t = 0
     grad = baudsosGradientas(taskas, r)
     epsilon = 1e-6
 
     while norma(grad) > epsilon:
 
-        gamma = auksoPjuvis(taskas, r)
+        i+=1
+
+        gamma, tikslas = auksoPjuvis(taskas, r, t)
+        t += tikslas
+
         naujasTaskas = [
             taskas[0] - gamma * grad[0],
             taskas[1] - gamma * grad[1],
@@ -150,6 +159,7 @@ def greiciausiasNusileidimas(taskas, r):
 
         sena_bauda = bauda(taskas, r)
         nauja_bauda = bauda(naujasTaskas, r)
+        t +=2
 
         if nauja_bauda > sena_bauda:
             while not tenkina_apribojimus(naujasTaskas):
@@ -169,21 +179,29 @@ def greiciausiasNusileidimas(taskas, r):
         grad = baudsosGradientas(naujasTaskas, r)
         taskas = naujasTaskas
 
-    return taskas
+    return taskas, i, t
 
 def optimumas(taskas1, taskas2, taskas3):
     epsilon = 1e-6
     rArray = [10, 5, 3, 2, 1, 0.5, 0.1, 0.001]
+    i1, i2, i3 = 0, 0, 0
+    t1, t2, t3 = 0, 0, 0
     for r in rArray:
-        #print (f"\n=== Iteracija su r = {r} ===")
-        n_taskas1 = greiciausiasNusileidimas(taskas1, r)
-        n_taskas2 = greiciausiasNusileidimas(taskas2, r)
-        n_taskas3 = greiciausiasNusileidimas(taskas3, r)
-        # print("****************************************************************")
-        # print("Nauji taskai")
-        # print(f"Taskas 1: {n_taskas1}")
-        # print(f"Taskas 2: {n_taskas2}")
-        # print(f"Taskas 3: {n_taskas3}")
+        print (f"\n=== Iteracija su r = {r} ===")
+        n_taskas1, iteracija1, tikslas1 = greiciausiasNusileidimas(taskas1, r, i1, t1)
+        n_taskas2, iteracija2, tikslas2 = greiciausiasNusileidimas(taskas2, r, i2, t2)
+        n_taskas3, iteracija3, tikslas3 = greiciausiasNusileidimas(taskas3, r, i3, t3)
+        i1 += iteracija1
+        i2 += iteracija2
+        i3 += iteracija3
+        t1 += tikslas1
+        t2 += tikslas2
+        t3 += tikslas3
+        print("****************************************************************")
+        print("Nauji taskai")
+        print(f"Taskas 1: {n_taskas1}")
+        print(f"Taskas 2: {n_taskas2}")
+        print(f"Taskas 3: {n_taskas3}")
         taskas1 = n_taskas1
         taskas2 = n_taskas2
         taskas3 = n_taskas3
@@ -193,10 +211,25 @@ def optimumas(taskas1, taskas2, taskas3):
     f1 = tikslo_funkcija(taskas1)
     f2 = tikslo_funkcija(taskas2)
     f3 = tikslo_funkcija(taskas3)
+    t1 += 1
+    t2 += 1
+    t3 += 1
 
     print(f"Taskas 1: {taskas1}, Tikslo funkcija: {f1}")
+    print(f"Iteraciju kiekis is tasko 1: {i1}")
+    print(f"Tikslo funkcija is tasko 1 kviesta: {t1}")
+
+    print("\n----------------------------------------------------")
+
     print(f"Taskas 2: {taskas2}, Tikslo funkcija: {f2}")
+    print(f"Iteraciju kiekis is tasko 2: {i2}")
+    print(f"Tikslo funkcija is tasko 2 kviesta: {t2}")
+
+    print("\n----------------------------------------------------")
+
     print(f"Taskas 3: {taskas3}, Tikslo funkcija: {f3}")
+    print(f"Iteraciju kiekis is tasko 3: {i3}")
+    print(f"Tikslo funkcija is tasko 3 kviesta: {t3}")
 
     funkcijos = [f1, f2, f3]
     taskai = [taskas1, taskas2, taskas3]
