@@ -76,7 +76,7 @@ def test():
 
 
 
-def auksoPjuvis(taskas, r, t):
+def auksoPjuvis(taskas, r):
     t = 0
     auksoPjuv = (math.sqrt(5) - 1) / 2
     a = 0.0
@@ -139,8 +139,9 @@ def norma(v):
 def tenkina_apribojimus(taskas):
     return gi(taskas) <= 0 and all(x >= 0 for x in taskas)
 
-def greiciausiasNusileidimas(taskas, r, i, t):
+def greiciausiasNusileidimas(taskas, r):
     t = 0
+    i = 0
     grad = baudsosGradientas(taskas, r)
     epsilon = 1e-6
 
@@ -148,7 +149,7 @@ def greiciausiasNusileidimas(taskas, r, i, t):
 
         i+=1
 
-        gamma, tikslas = auksoPjuvis(taskas, r, t)
+        gamma, tikslas = auksoPjuvis(taskas, r)
         t += tikslas
 
         naujasTaskas = [
@@ -188,9 +189,9 @@ def optimumas(taskas1, taskas2, taskas3):
     t1, t2, t3 = 0, 0, 0
     for r in rArray:
         print (f"\n=== Iteracija su r = {r} ===")
-        n_taskas1, iteracija1, tikslas1 = greiciausiasNusileidimas(taskas1, r, i1, t1)
-        n_taskas2, iteracija2, tikslas2 = greiciausiasNusileidimas(taskas2, r, i2, t2)
-        n_taskas3, iteracija3, tikslas3 = greiciausiasNusileidimas(taskas3, r, i3, t3)
+        n_taskas1, iteracija1, tikslas1 = greiciausiasNusileidimas(taskas1, r)
+        n_taskas2, iteracija2, tikslas2 = greiciausiasNusileidimas(taskas2, r)
+        n_taskas3, iteracija3, tikslas3 = greiciausiasNusileidimas(taskas3, r)
         i1 += iteracija1
         i2 += iteracija2
         i3 += iteracija3
