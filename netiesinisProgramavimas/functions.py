@@ -172,6 +172,7 @@ def greiciausiasNusileidimas(taskas, r):
                     taskas[1] - gamma * grad[1],
                     taskas[2] - gamma * grad[2]
                 ]
+
         if abs(taskas[0] - naujasTaskas[0]) + abs(taskas[1] - naujasTaskas[1]) + abs(taskas[2] - naujasTaskas[2]) < epsilon:
             break
         if gamma < epsilon:
